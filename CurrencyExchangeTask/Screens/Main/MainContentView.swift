@@ -7,12 +7,11 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    @State private var val: String = ""
+struct MainContentView: View {
+
+    @ObservedObject private var viewModel: MainViewModel
     
-    @ObservedObject private var viewModel: ViewModel
-    
-    init(viewModel: ViewModel) {
+    init(viewModel: MainViewModel) {
         self.viewModel = viewModel
     }
     
@@ -24,16 +23,10 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     Text("My balances")
                         .textCase(.uppercase)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack {
-                            ForEach(0...3, id: \.self) { index in
-                                Text("10000 EUR")
-                                    .onAppear {
-                                        print(index)
-                                    }
-                            }
-                        }
-                    }.frame(height: 40)
+
+                    // TODO: configure view
+                    WalletView(viewModel: viewModel.walletModel)
+                        .frame(height: 40)
                 }
                 
                 VStack {
@@ -103,7 +96,7 @@ struct ContentView: View {
                 Spacer()
                 
                 Button {
-                    
+                    viewModel.convert()
                 } label: {
                     Text("Submit")
                         .textCase(.uppercase)
@@ -114,8 +107,8 @@ struct ContentView: View {
                         .background(.blue)
                         .clipShape(Capsule())
                 }
+                .disabled(!viewModel.ableToConvert)
                 .padding(.horizontal, 24)
-                
             }
             .padding()
             .alert(viewModel.viewAlertContent?.title ?? "Done",
@@ -135,7 +128,7 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        let vm = ViewModel()
-        ContentView(viewModel: vm)
+        let vm = MainViewModel()
+        MainContentView(viewModel: vm)
     }
 }
