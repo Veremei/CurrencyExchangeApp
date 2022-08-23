@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 enum NetworkServiceError: Error {
     case missingResponseData
@@ -15,40 +16,31 @@ enum NetworkServiceError: Error {
 }
 
 protocol NetworkServiceProtocol {
-    func request(endpoint: Endpoint, completion: @escaping (Result<Data, Error>) -> Void)
+    func request(endpoint: Endpoint) -> AnyPublisher<Data, Error>
 }
 
 class NetworkService: NetworkServiceProtocol {
     static let shared = NetworkService()
-    
     private init() { }
+
+    private let urlSession = URLSession.shared
     
-    func request(endpoint: Endpoint, completion: @escaping (Result<Data, Error>) -> Void) {
-        guard let url = endpoint.url else { return }
+    func request(endpoint: Endpoint) -> AnyPublisher<Data, Error> {
+        guard let url = endpoint.url else {
+            return Fail<Data, Error>(error: NetworkServiceError.commonError)
+                .eraseToAnyPublisher()
+        }
+
         var urlRequest = URLRequest(url: url)
 
         endpoint.headers.forEach {
             urlRequest.setValue($0.value, forHTTPHeaderField: $0.key)
         }
 
-        URLSession.shared.dataTask(with: urlRequest) { data, response, error in
-            guard let urlResponse = response as? HTTPURLResponse else {
-                completion(.failure(NetworkServiceError.invalidResponse))
-                return
-            }
-            print("response status code:", urlResponse.statusCode)
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                completion(.failure(NetworkServiceError.missingResponseData))
-                return
-            }
-            print(String(data: data, encoding: .utf8))
-            completion(.success(data))
-        }.resume()
+        return urlSession.dataTaskPublisher(for: urlRequest)
+            .map(\.data)
+            .mapError{ $0 as Error }
+            .eraseToAnyPublisher()
     }
 }
 

@@ -18,16 +18,17 @@ struct TransactionItemRow: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(item.date, format: .dateTime.year().month().day())
                     .font(.callout)
                     .foregroundColor(.gray)
                 Text(item.info)
-                    .font(.title3)
+                    .font(.body)
                     .foregroundColor(.white)
                 
             }
             Spacer()
+            // TODO: Create formatter
             Text("\(item.value, specifier: "%.2f") \(item.bankAccount.currency.rawValue.currencyCodeSymbol ?? "")")
                 .font(.title3)
                 .foregroundColor(.white)

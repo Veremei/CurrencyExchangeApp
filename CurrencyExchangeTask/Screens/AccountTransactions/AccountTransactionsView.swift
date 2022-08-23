@@ -37,8 +37,6 @@ struct AccountTransactionsView: View {
             .navigationBarTitleDisplayMode(.large)
             .background(Constants.color.edgesIgnoringSafeArea(.all))
         }
-
-
     }
 }
 

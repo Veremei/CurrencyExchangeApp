@@ -1,5 +1,5 @@
 //
-//  AppStorage.swift
+//  AppStorageData.swift
 //  CurrencyExchangeTask
 //
 //  Created by Daniil Veramei on 23.08.2022.

@@ -14,3 +14,7 @@ enum Currency: String, CaseIterable, Identifiable, Hashable, Codable {
 
     var id: Self { self }
 }
+
+extension Currency {
+    static let defaultList: [Currency] = [.EUR, .USD, .GBP]
+}

@@ -1,5 +1,5 @@
 //
-//  WalletViewModel.swift
+//  BankAccountViewModel.swift
 //  CurrencyExchangeTask
 //
 //  Created by Daniil Veramei on 22.08.2022.
@@ -8,11 +8,11 @@
 import Foundation
 import Combine
 
-protocol WalletViewModel: ObservableObject {
+protocol BankAccountViewModel: ObservableObject {
     var accountsContentPublisher: Published<[BankAccount]>.Publisher { get }
 }
 
-final class WalletDefaultViewModel: WalletViewModel {
+final class BankAccountDefaultViewModel: BankAccountViewModel {
 
     @Published var accountsContent: [BankAccount] = []
     @Published var presentingTransactions = false
@@ -26,10 +26,11 @@ final class WalletDefaultViewModel: WalletViewModel {
 
     var accountsContentPublisher: Published<[BankAccount]>.Publisher { $accountsContent }
 
-    private let accountService: WalletServiceProtocol = WalletService.shared
+    private let accountService: WalletServiceProtocol
     private var cancellables: Set<AnyCancellable> = []
 
-    init() {
+    init(accountService: WalletServiceProtocol = ServicesRepository.shared.walletService) {
+        self.accountService = accountService
         subscribe()
     }
 

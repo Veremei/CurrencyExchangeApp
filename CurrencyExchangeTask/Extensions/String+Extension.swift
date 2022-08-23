@@ -16,4 +16,8 @@ extension String {
         }
         return locale.displayName(forKey: .currencySymbol, value: self)
     }
+
+    var localized: String {
+        return NSLocalizedString(self, comment: "")
+    }
 }

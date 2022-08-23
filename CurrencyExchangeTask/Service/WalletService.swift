@@ -8,18 +8,20 @@
 import Foundation
 import Combine
 
-protocol WalletServiceProtocol {
+protocol WalletServiceProtocol: AnyObject {
     var accountsPublisher: Published<[String: BankAccount]>.Publisher { get }
 
     func ableToDecrease(value: Double, fee: Double, from account: Currency) -> Bool
-    func increase(with value: Double, id: Currency, info: String)
-    func decrease(with value: Double, id: Currency, info: String)
+    func exchangeOperation(from sellValue: Double,
+                           from sellCurrency: Currency,
+                           to receiveValue: Double,
+                           to receiveCurrency: Currency,
+                           fee: Double)
 }
 
 final class WalletService: WalletServiceProtocol, ObservableObject {
-    static let shared = WalletService()
-    private init() {
-        accounts = cachedAccounts
+    init(existingAccounts: [String: BankAccount]) {
+        accounts = existingAccounts
     }
 
     @Published private(set) var accounts: [String: BankAccount] = [:] {
@@ -37,7 +39,7 @@ final class WalletService: WalletServiceProtocol, ObservableObject {
         return val - value - fee >= 0
     }
 
-    func increase(with value: Double, id: Currency, info: String) {
+    func changeBalance(with value: Double, id: Currency, info: String) {
         guard let bankAccount = accounts[id.rawValue] else { return }
         accounts[id.rawValue]?.accountValue += value
 
@@ -45,11 +47,16 @@ final class WalletService: WalletServiceProtocol, ObservableObject {
         AppStorageData.transactions.append(transaction)
     }
 
-    func decrease(with value: Double, id: Currency, info: String) {
-        guard let bankAccount = accounts[id.rawValue] else { return }
-        accounts[id.rawValue]?.accountValue -= value
-
-        let transaction = AccountTransaction(bankAccount: bankAccount, value: -value, info: info, date: Date())
-        AppStorageData.transactions.append(transaction)
+    func exchangeOperation(from sellValue: Double,
+                           from sellCurrency: Currency,
+                           to receiveValue: Double,
+                           to receiveCurrency: Currency,
+                           fee: Double) {
+        let transactionMessage = [sellCurrency.rawValue, receiveCurrency.rawValue].joined(separator: " to ")
+        changeBalance(with: -sellValue, id: sellCurrency, info: transactionMessage)
+        if fee > 0 {
+            changeBalance(with: -fee, id: sellCurrency, info: "Fee")
+        }
+        changeBalance(with: receiveValue, id: receiveCurrency, info: transactionMessage)
     }
 }

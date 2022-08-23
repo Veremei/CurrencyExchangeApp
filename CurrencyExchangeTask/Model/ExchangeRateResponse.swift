@@ -22,11 +22,9 @@ struct ExchangeRateResponseError: Decodable {
 }
 
 struct ExchangeRateResponseErrorDetails: Decodable {
-    let code: String
+    let code: String?
     let message: String
 }
-
-
 
 struct ConvertRateResponse: Decodable {
     let info: ConvertRateResponseInfo
