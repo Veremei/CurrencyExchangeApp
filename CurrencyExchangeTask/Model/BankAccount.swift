@@ -16,6 +16,8 @@ struct BankAccount: Identifiable, Hashable, Equatable, Codable {
 }
 
 extension BankAccount {
+    static let fakeAccount: BankAccount = BankAccount(currency: .EUR, accountValue: 1000, order: 0)
+
     static let fakeAccounts: [String: BankAccount] = [
         Currency.EUR.rawValue: BankAccount(currency: .EUR, accountValue: 1000, order: 0),
         Currency.USD.rawValue: BankAccount(currency: .USD, accountValue: 0, order: 1),

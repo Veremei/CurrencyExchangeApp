@@ -8,11 +8,19 @@
 import SwiftUI
 
 struct MainContentView: View {
+    private struct Constants {
+        // TODO: move to asset colors / app color scheme
+        static let color = Color(red: 0.102, green: 0.057, blue: 0.196)
+        static let secondaryColor = Color(red: 0.162, green: 0.134, blue: 0.251)
+
+        static let buttonHorizontalPadding: CGFloat = 24
+    }
 
     @ObservedObject private var viewModel: MainViewModel
     
     init(viewModel: MainViewModel) {
         self.viewModel = viewModel
+        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor.white]
     }
     
     var body: some View {
@@ -20,28 +28,32 @@ struct MainContentView: View {
             VStack(spacing: 40) {
 
                 // Wallet
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text("My balances")
+                        .font(.body)
                         .textCase(.uppercase)
+                        .foregroundColor(.white)
 
-                    // TODO: configure view
+                    // TODO: configure view model
                     WalletView(viewModel: viewModel.walletModel)
                         .onTapGesture(perform: {
                             viewModel.presentingTransactions = true
                         })
-                        .frame(height: 60)
+                        .frame(height: 100)
                 }
                 
                 VStack {
-                    HStack {
+                    HStack(alignment: .bottom) {
                         Text("Currency exchange")
+                            .font(.body)
                             .textCase(.uppercase)
+                            .foregroundColor(.white)
                         Spacer()
 
                         // Last update timestamp
                         if let date = viewModel.date {
                             Text(date, format: viewModel.dateStyle)
-                                .font(.subheadline)
+                                .font(.caption)
                                 .foregroundColor(.gray)
                         }
                     }
@@ -51,12 +63,18 @@ struct MainContentView: View {
                         Image(systemName: "arrow.up.circle.fill")
                             .foregroundColor(.red)
                         Text("Sell")
-
+                            .foregroundColor(.white)
+                        Spacer()
                         // Sell input
-                        TextField("Sell value", text: $viewModel.sellValue)
-                            .multilineTextAlignment(.trailing)
-                            .keyboardType(.decimalPad)
-                        
+
+                        TextField("",
+                                  text: $viewModel.sellValue)
+                        .modifier(PlaceholderStyle(showPlaceHolder: viewModel.sellValue.isEmpty, placeholder: "0.00", alignment: .trailing))
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.decimalPad)
+                        .frame(width: 100)
+
                         if !viewModel.sellCurrencies.isEmpty {
                             Divider()
                             Picker(selection: $viewModel.selectedSellCurrency, label: Text("Picker")) {
@@ -67,7 +85,11 @@ struct MainContentView: View {
                             .frame(width: 40)
                             .id(0)
                         }
-                    }.fixedSize(horizontal: false, vertical: true)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding()
+                    .background(Constants.secondaryColor)
+                    .cornerRadius(10)
 
 
                     Divider()
@@ -77,14 +99,20 @@ struct MainContentView: View {
                         Image(systemName: "arrow.down.circle.fill")
                             .foregroundColor(.green)
                         Text("Recieve")
-
+                            .foregroundColor(.white)
+                        Spacer()
                         // Recieve input
-                        TextField("Recieve value", text: $viewModel.buyValue)
+                        TextField("", text: $viewModel.buyValue)
+                            .modifier(PlaceholderStyle(showPlaceHolder: viewModel.buyValue.isEmpty, placeholder: "0.00", alignment: .trailing))
+                            .foregroundColor(.white)
                             .multilineTextAlignment(.trailing)
                             .keyboardType(.decimalPad)
+                            .frame(width: 100)
 
                         if !viewModel.receiveCurrencies.isEmpty {
                             Divider()
+
+
                             Picker(selection: $viewModel.selectedReceiveCurrency, label: Text("Picker")) {
                                 ForEach(viewModel.receiveCurrencies, id: \.self) { val in
                                     Text(val.rawValue).tag(val)
@@ -93,7 +121,11 @@ struct MainContentView: View {
                             .frame(width: 40)
                             .id(1)
                         }
-                    }.fixedSize(horizontal: false, vertical: true)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding()
+                    .background(Constants.secondaryColor)
+                    .cornerRadius(10)
                 }
                 
                 Spacer()
@@ -111,19 +143,20 @@ struct MainContentView: View {
                         .clipShape(Capsule())
                 }
                 .disabled(!viewModel.ableToConvert)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, Constants.buttonHorizontalPadding)
             }
             .padding()
             .alert(viewModel.viewAlertContent?.title ?? "Done",
-                   isPresented: $viewModel.presentingConvertAlert,
+                   isPresented: $viewModel.presentingAlert,
                    presenting: $viewModel.viewAlertContent,
                    actions: { _ in
                 Button("OK", action: {})
             }, message: { _ in
                 Text(viewModel.viewAlertContent?.message ?? "")
             })
-            .navigationTitle("Currency converter")
+            .navigationTitle(Text("Currency converter"))
             .navigationBarTitleDisplayMode(.inline)
+            .background(Constants.color.edgesIgnoringSafeArea(.all))
         }
         
     }

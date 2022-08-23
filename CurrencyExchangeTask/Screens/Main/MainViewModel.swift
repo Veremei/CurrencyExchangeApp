@@ -8,12 +8,6 @@
 import Foundation
 import Combine
 
-struct ViewAlertContent: Identifiable {
-    var id: String { title }
-    let title: String
-    let message: String
-}
-
 protocol SomeViewModel {
     func exchange()
 }
@@ -26,24 +20,32 @@ final class MainViewModel: ObservableObject {
 
     /// Sell field value.
     @Published var sellValue: String = "" {
+        // TODO: move to separate calc value
         didSet {
-            guard let buyIntValue = Double(sellValue),
-                  let rateConversion = currentRates[selectedReceiveCurrency],
-                  accountService.ableToDecrease(value: buyIntValue,
-                                                fee: exchangeService.getFee(amount: buyIntValue, for: selectedSellCurrency, feeRate: equivalentRate),
+            guard !sellValue.isEmpty, let buyDoubleValue = Double(sellValue), buyDoubleValue > 0 else {
+                ableToConvert = false
+                buyValue = "0"
+                return
+            }
+
+            guard let rateConversion = currentRates[selectedReceiveCurrency],
+                  accountService.ableToDecrease(value: buyDoubleValue,
+                                                fee: exchangeService.getFee(amount: buyDoubleValue, for: selectedSellCurrency, feeRate: equivalentRate),
                                                 from: selectedSellCurrency) else {
                 ableToConvert = false
-                // TODO: return Alert "wrong input value"
-                buyValue.removeAll()
-                return }
+                viewAlertContent = ViewAlertContent(title: "Wrong input value", message: "Check your input value")
+                presentingAlert = true
+                buyValue = "0"
+                return
+            }
             ableToConvert = true
-            let finalValue = rateConversion * buyIntValue
+            let finalValue = rateConversion * buyDoubleValue
             buyValue = String(format: "%.2f", finalValue)
         }
     }
 
     /// Buy/Receive field value.
-    @Published var buyValue: String = ""
+    @Published var buyValue: String = "0"
 
     /// Currently selected sell currency.
     @Published var selectedSellCurrency: Currency {
@@ -77,7 +79,7 @@ final class MainViewModel: ObservableObject {
     @Published private(set) var receiveCurrencies: [Currency] = []
 
     @Published var viewAlertContent: ViewAlertContent?
-    @Published var presentingConvertAlert = false
+    @Published var presentingAlert = false
 
     @Published var presentingTransactions = false
     @Published var presentingTransactionsBankAccount: BankAccount?
@@ -108,6 +110,8 @@ final class MainViewModel: ObservableObject {
         self.selectedReceiveCurrency = allCurrencies.first ?? .EUR
 
         updateCurrenciesState()
+
+//        self.sellValue = "0"
         subscribe()
     }
 
@@ -149,17 +153,7 @@ final class MainViewModel: ObservableObject {
 
     /// Convert current sell field value
     func convert() {
-//        guard accountService.ableToDecrease(value: sellDoubleValue, with: fee, from: selectedSellCurrency) else {
-//            // - TODO: Alert insufficient funds...
-//            // - TODO: move to text field check
-//          the balance can't fall below zero
-//            return
-//        }
-
         guard let sellDoubleValue = Double(sellValue) else { return }
-//        let fee = exchangeService.getFee(amount: sellDoubleValue, for: selectedSellCurrency, rate: 1)
-
-
         exchangeService.convert(amount: sellValue,
                                 from: selectedSellCurrency,
                                 to: selectedReceiveCurrency) { [weak self] result in
@@ -174,9 +168,8 @@ final class MainViewModel: ObservableObject {
                 let updatedFee = self.exchangeService.getFee(amount: sellDoubleValue, for: self.selectedSellCurrency, feeRate: self.equivalentRate)
 
                 guard self.accountService.ableToDecrease(value: sellDoubleValue, fee: updatedFee, from: self.selectedSellCurrency) else {
-                    // TODO: Alert insufficient funds...
-                    #warning("Alert")
-                    //                    the balance can't fall below zero
+                    self.viewAlertContent = ViewAlertContent(title: "Insufficient funds", message: "the balance can't fall below zero")
+                    self.presentingAlert = true
                     return
                 }
 
@@ -185,11 +178,15 @@ final class MainViewModel: ObservableObject {
 
                 // TODO: optimise ->
                 #warning("optimise")
-                self.accountService.decrease(with: sellDoubleValue, id: self.selectedSellCurrency)
-                self.accountService.increase(with: response.result, id: self.selectedReceiveCurrency)
+                self.accountService.decrease(with: sellDoubleValue, id: self.selectedSellCurrency, info: "\(self.selectedSellCurrency) to \(self.selectedReceiveCurrency)")
+                if updatedFee > 0 {
+                    self.accountService.decrease(with: updatedFee, id: self.selectedSellCurrency, info: "Fee")
+                }
+                self.accountService.increase(with: response.result, id: self.selectedReceiveCurrency, info: "\(self.selectedSellCurrency) to \(self.selectedReceiveCurrency)")
 
+                self.reset()
                 self.viewAlertContent = ViewAlertContent(title: "Currency converted", message: message)
-                self.presentingConvertAlert = true
+                self.presentingAlert = true
             case .failure(let error):
                 // TODO: Alert
                 print(error)
@@ -209,5 +206,10 @@ final class MainViewModel: ObservableObject {
         receiveCurrencies = allCurrencies.filter { $0 != selectedSellCurrency }
 
         loadRates()
+    }
+
+    private func reset() {
+        sellValue = "0"
+        buyValue = "0"
     }
 }

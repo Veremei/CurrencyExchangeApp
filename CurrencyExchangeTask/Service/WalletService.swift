@@ -12,8 +12,8 @@ protocol WalletServiceProtocol {
     var accountsPublisher: Published<[String: BankAccount]>.Publisher { get }
 
     func ableToDecrease(value: Double, fee: Double, from account: Currency) -> Bool
-    func increase(with value: Double, id: Currency)
-    func decrease(with value: Double, id: Currency)
+    func increase(with value: Double, id: Currency, info: String)
+    func decrease(with value: Double, id: Currency, info: String)
 }
 
 final class WalletService: WalletServiceProtocol, ObservableObject {
@@ -37,19 +37,19 @@ final class WalletService: WalletServiceProtocol, ObservableObject {
         return val - value - fee >= 0
     }
 
-    func increase(with value: Double, id: Currency) {
+    func increase(with value: Double, id: Currency, info: String) {
         guard let bankAccount = accounts[id.rawValue] else { return }
         accounts[id.rawValue]?.accountValue += value
 
-        let transaction = AccountTransaction(bankAccount: bankAccount, value: value, date: Date())
+        let transaction = AccountTransaction(bankAccount: bankAccount, value: value, info: info, date: Date())
         AppStorageData.transactions.append(transaction)
     }
 
-    func decrease(with value: Double, id: Currency) {
+    func decrease(with value: Double, id: Currency, info: String) {
         guard let bankAccount = accounts[id.rawValue] else { return }
         accounts[id.rawValue]?.accountValue -= value
 
-        let transaction = AccountTransaction(bankAccount: bankAccount, value: -value, date: Date())
+        let transaction = AccountTransaction(bankAccount: bankAccount, value: -value, info: info, date: Date())
         AppStorageData.transactions.append(transaction)
     }
 }

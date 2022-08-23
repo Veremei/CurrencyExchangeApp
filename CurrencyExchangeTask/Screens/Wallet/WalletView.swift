@@ -8,7 +8,12 @@
 import SwiftUI
 
 struct WalletView: View {
-
+    private struct Constants {
+        // TODO: move to asset colors / app color scheme
+        static let color = Color(red: 0.102, green: 0.057, blue: 0.196)
+        static let secondaryColor = Color(red: 0.162, green: 0.134, blue: 0.251)
+    }
+    
     @ObservedObject private var viewModel: WalletDefaultViewModel
 
     // TODO: configure view model
@@ -20,18 +25,9 @@ struct WalletView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack {
                 ForEach($viewModel.accountsContent, id: \.self) { $account in
-
-                    VStack {
-                        
-                        Text("\(String(format: "%.2f", account.accountValue)) \(account.currency.rawValue)")
-                            .padding()
-                            .foregroundColor(.white)
-                            .background(.blue)
-                            .cornerRadius(14)
-                            .onTapGesture {
-                                viewModel.presentingTransactionsBankAccount = account
-                        }
-
+                    WalletAccountView(account: account)
+                    .onTapGesture {
+                        viewModel.presentingTransactionsBankAccount = account
                     }
                 }
             }
@@ -42,6 +38,8 @@ struct WalletView: View {
             })
         }
     }
+
+    
 }
 
 struct WalletView_Previews: PreviewProvider {
