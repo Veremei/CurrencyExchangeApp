@@ -13,11 +13,14 @@
 		BA652CFF28B43721002B3459 /* AccountTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA652CFE28B43721002B3459 /* AccountTransaction.swift */; };
 		BA652D0128B43777002B3459 /* AccountTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA652D0028B43777002B3459 /* AccountTransactionsView.swift */; };
 		BA652D0328B437EB002B3459 /* AccountTransactionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA652D0228B437EB002B3459 /* AccountTransactionsViewModel.swift */; };
-		BA652D0528B438C0002B3459 /* TransactionsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA652D0428B438C0002B3459 /* TransactionsProvider.swift */; };
+		BA652D0528B438C0002B3459 /* TransactionsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA652D0428B438C0002B3459 /* TransactionsStore.swift */; };
+		BA652D0828B43A67002B3459 /* TransactionItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA652D0728B43A67002B3459 /* TransactionItemRow.swift */; };
 		BA6B6B2128970CAB00298B84 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA6B6B2028970CAB00298B84 /* MainViewModel.swift */; };
 		BA6B6B2328970CB200298B84 /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA6B6B2228970CB200298B84 /* NetworkService.swift */; };
 		BA6B6B2628970CBB00298B84 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA6B6B2528970CBB00298B84 /* AppError.swift */; };
 		BA6B6B2828970CCB00298B84 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA6B6B2728970CCB00298B84 /* Endpoint.swift */; };
+		BA76043428B4438B00405524 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA76043328B4438B00405524 /* Storage.swift */; };
+		BA76043628B4453D00405524 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA76043528B4453D00405524 /* AppStorage.swift */; };
 		BA82B87F2896D3EA009DC0DF /* CurrencyExchangeTaskApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA82B87E2896D3EA009DC0DF /* CurrencyExchangeTaskApp.swift */; };
 		BA82B8812896D3EA009DC0DF /* MainContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA82B8802896D3EA009DC0DF /* MainContentView.swift */; };
 		BA82B8832896D3EB009DC0DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BA82B8822896D3EB009DC0DF /* Assets.xcassets */; };
@@ -55,11 +58,14 @@
 		BA652CFE28B43721002B3459 /* AccountTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTransaction.swift; sourceTree = "<group>"; };
 		BA652D0028B43777002B3459 /* AccountTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTransactionsView.swift; sourceTree = "<group>"; };
 		BA652D0228B437EB002B3459 /* AccountTransactionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTransactionsViewModel.swift; sourceTree = "<group>"; };
-		BA652D0428B438C0002B3459 /* TransactionsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsProvider.swift; sourceTree = "<group>"; };
+		BA652D0428B438C0002B3459 /* TransactionsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsStore.swift; sourceTree = "<group>"; };
+		BA652D0728B43A67002B3459 /* TransactionItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionItemRow.swift; sourceTree = "<group>"; };
 		BA6B6B2028970CAB00298B84 /* MainViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		BA6B6B2228970CB200298B84 /* NetworkService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		BA6B6B2528970CBB00298B84 /* AppError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
 		BA6B6B2728970CCB00298B84 /* Endpoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
+		BA76043328B4438B00405524 /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
+		BA76043528B4453D00405524 /* AppStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
 		BA82B87B2896D3EA009DC0DF /* CurrencyExchangeTask.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CurrencyExchangeTask.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA82B87E2896D3EA009DC0DF /* CurrencyExchangeTaskApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyExchangeTaskApp.swift; sourceTree = "<group>"; };
 		BA82B8802896D3EA009DC0DF /* MainContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainContentView.swift; sourceTree = "<group>"; };
@@ -132,10 +138,19 @@
 		BA652D0628B43919002B3459 /* AccountTransactions */ = {
 			isa = PBXGroup;
 			children = (
+				BA652D0928B43C72002B3459 /* Item */,
 				BA652D0028B43777002B3459 /* AccountTransactionsView.swift */,
 				BA652D0228B437EB002B3459 /* AccountTransactionsViewModel.swift */,
 			);
 			path = AccountTransactions;
+			sourceTree = "<group>";
+		};
+		BA652D0928B43C72002B3459 /* Item */ = {
+			isa = PBXGroup;
+			children = (
+				BA652D0728B43A67002B3459 /* TransactionItemRow.swift */,
+			);
+			path = Item;
 			sourceTree = "<group>";
 		};
 		BA6B6B2428970CBB00298B84 /* Errors */ = {
@@ -181,9 +196,18 @@
 				BA6B6B2228970CB200298B84 /* NetworkService.swift */,
 				BA96AC4528B167BB003ADAD4 /* WalletService.swift */,
 				BA96AC4928B16802003ADAD4 /* ExchangeRateService.swift */,
-				BA652D0428B438C0002B3459 /* TransactionsProvider.swift */,
+				BA652D0428B438C0002B3459 /* TransactionsStore.swift */,
 			);
 			path = Service;
+			sourceTree = "<group>";
+		};
+		BA76043228B4437E00405524 /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				BA76043328B4438B00405524 /* Storage.swift */,
+				BA76043528B4453D00405524 /* AppStorage.swift */,
+			);
+			path = Utility;
 			sourceTree = "<group>";
 		};
 		BA82B8722896D3EA009DC0DF = {
@@ -211,6 +235,7 @@
 			children = (
 				BA6B6B2B2897193700298B84 /* App */,
 				BA6B6B292897191C00298B84 /* Model */,
+				BA76043228B4437E00405524 /* Utility */,
 				BA6B6B2C2897195100298B84 /* Service */,
 				BA652CF828B3D9CF002B3459 /* Screens */,
 				BA6B6B2A2897193000298B84 /* Resources */,
@@ -377,11 +402,14 @@
 				BA82B8812896D3EA009DC0DF /* MainContentView.swift in Sources */,
 				BA6B6B2128970CAB00298B84 /* MainViewModel.swift in Sources */,
 				BA652CFD28B3DA8F002B3459 /* WalletViewModel.swift in Sources */,
+				BA76043428B4438B00405524 /* Storage.swift in Sources */,
 				BA6B6B2628970CBB00298B84 /* AppError.swift in Sources */,
-				BA652D0528B438C0002B3459 /* TransactionsProvider.swift in Sources */,
+				BA652D0528B438C0002B3459 /* TransactionsStore.swift in Sources */,
 				BA6B6B2328970CB200298B84 /* NetworkService.swift in Sources */,
 				BADFB40428B2BF550056C345 /* BankAccount.swift in Sources */,
 				BA96AC4828B167D3003ADAD4 /* Currency.swift in Sources */,
+				BA76043628B4453D00405524 /* AppStorage.swift in Sources */,
+				BA652D0828B43A67002B3459 /* TransactionItemRow.swift in Sources */,
 				BA280E1128B235AD001186F4 /* ExchangeRateResponse.swift in Sources */,
 				BA652CFF28B43721002B3459 /* AccountTransaction.swift in Sources */,
 				BA652D0128B43777002B3459 /* AccountTransactionsView.swift in Sources */,

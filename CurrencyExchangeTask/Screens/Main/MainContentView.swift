@@ -26,7 +26,10 @@ struct MainContentView: View {
 
                     // TODO: configure view
                     WalletView(viewModel: viewModel.walletModel)
-                        .frame(height: 40)
+                        .onTapGesture(perform: {
+                            viewModel.presentingTransactions = true
+                        })
+                        .frame(height: 60)
                 }
                 
                 VStack {

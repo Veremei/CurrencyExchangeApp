@@ -15,6 +15,15 @@ protocol WalletViewModel: ObservableObject {
 final class WalletDefaultViewModel: WalletViewModel {
 
     @Published var accountsContent: [BankAccount] = []
+    @Published var presentingTransactions = false
+    @Published var presentingTransactionsBankAccount: BankAccount? {
+        didSet {
+            if let _ = presentingTransactionsBankAccount {
+                presentingTransactions = true
+            }
+        }
+    }
+
     var accountsContentPublisher: Published<[BankAccount]>.Publisher { $accountsContent }
 
     private let accountService: WalletServiceProtocol = WalletService.shared
@@ -28,7 +37,7 @@ final class WalletDefaultViewModel: WalletViewModel {
         accountService.accountsPublisher
             .sink(receiveValue: { [weak self] accounts in
                 guard let self = self else { return }
-                self.accountsContent = Array(accounts.values)
+                self.accountsContent = Array(accounts.values).sorted(by: { $0.order < $1.order })
             })
             .store(in: &cancellables)
     }

@@ -78,6 +78,10 @@ final class MainViewModel: ObservableObject {
 
     @Published var viewAlertContent: ViewAlertContent?
     @Published var presentingConvertAlert = false
+
+    @Published var presentingTransactions = false
+    @Published var presentingTransactionsBankAccount: BankAccount?
+
     @Published var ableToConvert = false
 
 

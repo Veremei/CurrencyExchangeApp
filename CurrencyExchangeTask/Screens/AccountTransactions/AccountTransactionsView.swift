@@ -15,12 +15,14 @@ struct AccountTransactionsView: View {
     }
 
     var body: some View {
-        Text("")
+        List(viewModel.transactions) { row in
+            TransactionItemRow(item: row)
+        }
     }
 }
 
 struct AccountTransactionsView_Previews: PreviewProvider {
     static var previews: some View {
-        AccountTransactionsView(viewModel: AccountTransactionsDefaultViewModel())
+        AccountTransactionsView(viewModel: AccountTransactionsDefaultViewModel(account: nil))
     }
 }

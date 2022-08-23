@@ -9,28 +9,21 @@ import Foundation
 import Combine
 
 protocol AccountTransactionsViewModel: ObservableObject {
-//    var accountsContentPublisher: Published<[BankAccount]>.Publisher { get }
 }
 
 final class AccountTransactionsDefaultViewModel: AccountTransactionsViewModel {
 
-    @Published var transactions: [AccountTransaction] = []
-//    var accountsContentPublisher: Published<[BankAccount]>.Publisher { $accountsContent }
+    private(set) var transactions: [AccountTransaction] = []
 
-    private let transactionsProvider: TransactionsProvider
-    private var cancellables: Set<AnyCancellable> = []
+//    private let transactionsProvider: TransactionsStoreProtocol
 
-    init() {
-        transactionsProvider = TransactionsProvider()
-        subscribe()
-    }
+    init(account: BankAccount?) {
+        guard let account = account else {
+            return
+        }
 
-    private func subscribe() {
-        transactionsProvider.$transactions
-            .sink(receiveValue: { [weak self] transactions in
-                guard let self = self else { return }
-                self.transactions = transactions
-            })
-            .store(in: &cancellables)
+        self.transactions = AppStorageData.transactions
+            .filter { $0.bankAccount.id == account.id }
+            .sorted(by: { $0.date > $1.date })
     }
 }
