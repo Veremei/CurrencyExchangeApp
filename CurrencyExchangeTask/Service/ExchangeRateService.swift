@@ -28,21 +28,24 @@ enum ExchangeRateServiceError: Error, LocalizedError {
 }
 
 protocol ExchangeRateServiceProtocol {
+    var lastRatesResult: PassthroughSubject<ExchangeRateResponse, Error> { get }
     var reguralFee: Double { get }
 
-    func loadRates(for base: Currency, with symbols: [Currency]) -> AnyPublisher<ExchangeRateResponse, Error>
+    func loadRates(for base: Currency, with symbols: [Currency])
     func convert(amount: String, from: Currency, to: Currency) -> AnyPublisher<ConvertRateResponse, Error>
     func getFee(amount: Double, for currency: Currency, feeRate: Double) -> Double
 }
 
-final class ExchangeRateService: ExchangeRateServiceProtocol {
+final class ExchangeRateService: ExchangeRateServiceProtocol, ObservableObject {
+
     private let networkService: NetworkServiceProtocol
     private unowned let walletService: WalletServiceProtocol
 
     // TODO: hide api in secrets
-    private let apikey = "5ervFjYovs8rEWtc8e4A2Wx3OHj84Fqd"
+    private let apikey = "R1FIHa1NUWJJ6NYUBTLezBeCuDNeTKWQ"
 
-    private let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+    private(set) var lastRatesResult: PassthroughSubject<ExchangeRateResponse, Error> = .init()
+    private var timer: Timer?
 
     private(set) var reguralFee: Double = 0
     private var cancellables: Set<AnyCancellable> = []
@@ -73,7 +76,7 @@ final class ExchangeRateService: ExchangeRateServiceProtocol {
     }
 
     // TODO: Add timestamp to sync currency, avoid multiple calls(caching)
-    func loadRates(for base: Currency, with symbols: [Currency]) -> AnyPublisher<ExchangeRateResponse, Error> {
+    func loadRates(for base: Currency, with symbols: [Currency]) {
         let joinedSymbols = symbols.map { $0.rawValue }.joined(separator: ",")
         let endpoint = Endpoint(host: "api.apilayer.com",
                                 path: "/exchangerates_data/latest",
@@ -81,24 +84,21 @@ final class ExchangeRateService: ExchangeRateServiceProtocol {
                                 queryItems: [
                                     URLQueryItem(name: "base", value: base.rawValue),
                                     URLQueryItem(name: "symbols", value: joinedSymbols)])
-
-        return networkService.request(endpoint: endpoint)
-            .receive(on: DispatchQueue.main)
-            .mapError { $0 as Error }
-            .flatMap { data -> AnyPublisher<ExchangeRateResponse, Error> in
-                let decoder = JSONDecoder()
-
-                if let decodedError = self.decodeError(from: data) {
-                    return Fail(error: decodedError)
-                        .eraseToAnyPublisher()
+        timer = nil
+        self.getLatestRates(endpoint: endpoint)
+            .sink { [weak self] completion in
+                switch completion {
+                case .finished:
+                    return
+                case .failure(let error):
+                    self?.lastRatesResult.send(completion: .failure(error))
                 }
+            } receiveValue: { [weak self] response in
+                guard let self = self else { return }
+                self.lastRatesResult.send(response)
+                self.subscribeToRates(endpoint: endpoint)
+            }.store(in: &self.cancellables)
 
-                return Just(data)
-                    .decode(type: ExchangeRateResponse.self, decoder: decoder)
-                    .mapError { $0 as Error }
-                    .eraseToAnyPublisher()
-            }
-            .eraseToAnyPublisher()
     }
 
     func convert(amount: String, from: Currency, to: Currency) -> AnyPublisher<ConvertRateResponse, Error> {
@@ -127,7 +127,6 @@ final class ExchangeRateService: ExchangeRateServiceProtocol {
                     return Just(rateResponse)
                         .setFailureType(to: Error.self)
                         .eraseToAnyPublisher()
-                    
                 } catch {
                     return Fail(error: error).eraseToAnyPublisher()
                 }
@@ -160,6 +159,42 @@ final class ExchangeRateService: ExchangeRateServiceProtocol {
         default:
             reguralFee = 0
         }
+    }
+
+    private func subscribeToRates(endpoint: Endpoint) {
+        self.timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true, block: { [weak self] _ in
+            guard let self = self else { return }
+            self.getLatestRates(endpoint: endpoint)
+                .sink { completion in
+                    switch completion {
+                    case .finished:
+                        return
+                    case .failure(let error):
+                        self.lastRatesResult.send(completion: .failure(error))
+                    }
+                } receiveValue: { response in
+                    self.lastRatesResult.send(response)
+                }.store(in: &self.cancellables)
+        })
+    }
+
+    private func getLatestRates(endpoint: Endpoint) -> AnyPublisher<ExchangeRateResponse, Error> {
+        return networkService.request(endpoint: endpoint)
+            .receive(on: DispatchQueue.main)
+            .mapError { $0 as Error }
+            .flatMap { data -> AnyPublisher<ExchangeRateResponse, Error> in
+                let decoder = JSONDecoder()
+
+                if let decodedError = self.decodeError(from: data) {
+                    return Fail(error: decodedError)
+                        .eraseToAnyPublisher()
+                }
+
+                return Just(data)
+                    .decode(type: ExchangeRateResponse.self, decoder: decoder)
+                    .mapError { $0 as Error }
+                    .eraseToAnyPublisher()
+            }.eraseToAnyPublisher()
     }
 
     private func decodeError(from data: Data) -> Error? {

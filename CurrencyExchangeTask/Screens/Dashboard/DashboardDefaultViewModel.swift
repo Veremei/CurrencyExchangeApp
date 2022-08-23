@@ -95,6 +95,31 @@ final class DashboardDefaultViewModel: DashboardViewModel {
             })
             .store(in: &cancellables)
 
+        exchangeService.lastRatesResult
+            .sink(receiveCompletion: { [weak self] result in
+                switch result {
+                case .failure(let error):
+                    self?.showAlert(title: "Error", message: error.localizedDescription)
+                case .finished:
+                    return
+                }
+            }, receiveValue: { [weak self] response in
+                guard let self = self else { return }
+
+                if let timestamp = response.timestamp {
+                    self.date = Date(timeIntervalSince1970: timestamp)
+                }
+
+                for (key, value) in response.rates {
+                    guard let currencyKey = Currency(rawValue: key) else {
+                        continue
+                    }
+                    self.currentRates[currencyKey] = value
+                }
+            })
+        .store(in: &cancellables)
+
+
         $sellValue.sink { [weak self] value in
             guard let self = self else {
                 return
@@ -148,30 +173,6 @@ final class DashboardDefaultViewModel: DashboardViewModel {
 
     func loadRates() {
         exchangeService.loadRates(for: selectedSellCurrency, with: receiveCurrencies)
-            .sink(receiveCompletion: { [weak self] result in
-                switch result {
-                case .failure(let error):
-                    self?.showAlert(title: "Error", message: error.localizedDescription)
-                case .finished:
-                    return
-                }
-            }, receiveValue: { [weak self] response in
-                guard let self = self else { return }
-
-                if let timestamp = response.timestamp {
-                    self.date = Date(timeIntervalSince1970: timestamp)
-                } else {
-                    self.date = Date()
-                }
-
-                for (key, value) in response.rates {
-                    guard let currencyKey = Currency(rawValue: key) else {
-                        continue
-                    }
-                    self.currentRates[currencyKey] = value
-                }
-            })
-            .store(in: &cancellables)
     }
 
     /// Convert current sell field value

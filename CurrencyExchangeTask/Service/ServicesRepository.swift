@@ -13,7 +13,6 @@ final class ServicesRepository {
     private(set) var exchangeRateService: ExchangeRateServiceProtocol
     private(set) var walletService: WalletServiceProtocol
 
-
     private init() {
         let networkService = NetworkService.shared
 
@@ -21,5 +20,4 @@ final class ServicesRepository {
         // use ExchangeRateService fake when "You have exceeded your daily..."
         exchangeRateService = ExchangeRateService(networkService: networkService, walletService: walletService)
     }
-
 }
