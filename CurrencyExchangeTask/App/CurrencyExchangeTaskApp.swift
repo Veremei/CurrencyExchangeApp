@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct CurrencyExchangeTaskApp: App {
+    let mainCoordinator = MainContentCoordinator()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            mainCoordinator.build()
         }
     }
 }
